@@ -167,7 +167,7 @@ def main(args):
     setPythonVersion(args)
     setDevModeOptions(args)
 
-    os.environ['PYTHONPATH'] = phoenixDir()
+    os.environ['PYTHONPATH'] = os.environ.get('PYTHONPATH', '') + os.pathsep + phoenixDir()
     os.environ['PYTHONUNBUFFERED'] = 'yes'
     os.environ['WXWIN'] = wxDir()
 
@@ -1446,7 +1446,7 @@ def cmd_build_wx(options, args):
                 build_options.append('--gtk3')
 
         # Change to what will be the wxWidgets build folder
-        # (Note, this needs to be after any testing for file/path existance, etc.
+        # (Note, this needs to be after any testing for file/path existence, etc.
         # because they may be specified as relative paths.)
         pwd = pushDir(BUILD_DIR)
 
@@ -1699,7 +1699,7 @@ def cmd_build_docker(options, args):
 
 
 def cmd_build_others(options, args):
-    # Build other stuff that may have their own seprarate build commands instead
+    # Build other stuff that may have their own separate build commands instead
     # of the (ab)normal etg/tweak/generate/sip/compile sequence that the rest of
     # wxPython uses. So far, it's just the wx.svg package
     cmdTimer = CommandTimer('build_others')
@@ -2037,6 +2037,7 @@ def cmd_sdist(options, args):
         destdir = posixjoin(PDEST, cfg.PKGDIR)
         for name in glob.glob(posixjoin(cfg.PKGDIR, wc)):
             copyFile(name, destdir)
+    copyFile('demo/version.py', posixjoin(PDEST, 'demo'))
 
     # Copy the license files from wxWidgets
     msg('Copying license files...')
@@ -2119,6 +2120,7 @@ def cmd_sdist_demo(options, args):
 
     # Add in the README file
     copyFile('packaging/README-sdist_demo.txt', posixjoin(PDEST, 'README.txt'))
+    copyFile('demo/version.py', posixjoin(PDEST, 'demo'))
 
     # build the tarball
     msg('Archiving Phoenix demo and samples...')
@@ -2223,7 +2225,7 @@ def cmd_setpythonpath(options, args):
     assert os.getcwd() == phoenixDir()
 
     sys.path.insert(0, phoenixDir())
-    os.environ['PYTHONPATH'] = phoenixDir()
+    os.environ['PYTHONPATH'] = os.environ.get('PYTHONPATH', '') + os.pathsep + phoenixDir()
 
 
 

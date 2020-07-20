@@ -288,10 +288,10 @@ class FunctionDef(BaseDef, FixWxPrefix):
         self.pyInt = False            # treat char types as integers
         self.transfer = False         # transfer ownership of return value to C++?
         self.transferBack = False     # transfer ownership of return value from C++ to Python?
-        self.transferThis = False     # ownership of 'this' pointer transfered to C++
+        self.transferThis = False     # ownership of 'this' pointer transferred to C++
         self.cppCode = None           # Use this code instead of the default wrapper
         self.noArgParser = False      # set the NoargParser annotation
-        self.mustHaveAppFlag = False
+        self.preMethodCode = None
 
         self.__dict__.update(kw)
         if element is not None:
@@ -486,7 +486,7 @@ class FunctionDef(BaseDef, FixWxPrefix):
                         'wxArrayInt()' : '[]',
                         }
         if isinstance(self, CppMethodDef):
-            # rip appart the argsString instead of using the (empty) list of parameters
+            # rip apart the argsString instead of using the (empty) list of parameters
             lastP = self.argsString.rfind(')')
             args = self.argsString[:lastP].strip('()').split(',')
             for arg in args:
@@ -556,7 +556,11 @@ class FunctionDef(BaseDef, FixWxPrefix):
 
 
     def mustHaveApp(self, value=True):
-        self.mustHaveAppFlag = value
+        if value:
+            self.preMethodCode = "if (!wxPyCheckForApp()) return NULL;\n"
+        else:
+            self.preMethodCode = None
+
 
 #---------------------------------------------------------------------------
 
@@ -668,7 +672,7 @@ class ClassDef(BaseDef):
         self.abstract = False       # is it an abstract base class?
         self.external = False       # class is in another module
         self.noDefCtor = False      # do not generate a default constructor
-        self.singlton = False       # class is a singleton so don't call the dtor until the interpreter exits
+        self.singleton = False       # class is a singleton so don't call the dtor until the interpreter exits
         self.allowAutoProperties = True
         self.headerCode = []
         self.cppCode = []
@@ -679,7 +683,7 @@ class ClassDef(BaseDef):
         self.innerclasses = []
         self.isInner = False        # Is this a nested class?
         self.klass = None           # if so, then this is the outer class
-        self.mustHaveAppFlag = False
+        self.preMethodCode = None
 
         # Stuff that needs to be generated after the class instead of within
         # it. Some back-end generators need to put stuff inside the class, and
@@ -1133,7 +1137,10 @@ private:
         self.addItem(wig)
 
     def mustHaveApp(self, value=True):
-        self.mustHaveAppFlag = value
+        if value:
+            self.preMethodCode = "if (!wxPyCheckForApp()) return NULL;\n"
+        else:
+            self.preMethodCode = None
 
 
     def copyFromClass(self, klass, name):

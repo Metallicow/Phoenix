@@ -593,7 +593,7 @@ class LargeImageEditor(wxpg.PGEditor):
 
     def GetValueFromControl(self, property, ctrl):
         """ Return tuple (wasSuccess, newValue), where wasSuccess is True if
-            different value was acquired succesfully.
+            different value was acquired successfully.
         """
         textVal = self.tc.GetValue()
 
@@ -678,7 +678,7 @@ class TestPanel( wx.Panel ):
                               wxpg.PG_TOOLBAR)
 
         # Show help as tooltips
-        pg.SetExtraStyle(wxpg.PG_EX_HELP_AS_TOOLTIPS)
+        pg.ExtraStyle |= wxpg.PG_EX_HELP_AS_TOOLTIPS
 
         pg.Bind( wxpg.EVT_PG_CHANGED, self.OnPropGridChange )
         pg.Bind( wxpg.EVT_PG_PAGE_CHANGED, self.OnPropGridPageChange )

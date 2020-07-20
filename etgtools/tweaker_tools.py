@@ -520,14 +520,14 @@ def addSipConvertToSubClassCode(klass):
     %ConvertToSubClassCode
         const wxClassInfo* info   = sipCpp->GetClassInfo();
         wxString           name   = info->GetClassName();
-        bool               exists = sipFindType(name) != NULL;
+        bool               exists = sipFindType(name.c_str()) != NULL;
         while (info && !exists) {
             info = info->GetBaseClass1();
             name = info->GetClassName();
-            exists = sipFindType(name) != NULL;
+            exists = sipFindType(name.c_str()) != NULL;
         }
         if (info)
-            sipType = sipFindType(name);
+            sipType = sipFindType(name.c_str());
         else
             sipType = NULL;
     %End
@@ -1403,7 +1403,7 @@ def generateStubs(cppFlag, module, excludes=[], typeValMap={},
 
 
 # A simple class for holding lists of code snippets for the header and
-# possibily the C++ file.
+# possibly the C++ file.
 class _StubCodeHolder:
     def __init__(self, flag):
         self.flag = flag

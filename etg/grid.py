@@ -33,7 +33,11 @@ ITEMS  = [ 'wxGridCellCoords',
            'wxGridCellFloatRenderer',
            'wxGridCellNumberRenderer',
 
+           'wxGridActivationResult',
+           'wxGridActivationSource',
+
            'wxGridCellEditor',
+           'wxGridCellActivatableEditor',
            'wxGridCellTextEditor',
            'wxGridCellDateEditor',
            'wxGridCellAutoWrapStringEditor',
@@ -187,7 +191,7 @@ def run():
 
     c.addPyMethod('__iter__', '(self)',
                   'return PyGridBlocksIterator(self)',
-                  "Returns a Python iterator for acessing the collection of grid blocks.")
+                  "Returns a Python iterator for accessing the collection of grid blocks.")
 
     # This class is the Python iterator that knows how to fetch blocks from the
     # wxGridBlocks object
@@ -275,6 +279,20 @@ def run():
             fixRendererClass(name)
 
     module.addPyCode("PyGridCellRenderer = wx.deprecated(GridCellRenderer, 'Use GridCellRenderer instead.')")
+
+
+    #-----------------------------------------------------------------
+
+    c = module.find('wxGridActivationResult')
+    c.ignore() # FIXME
+    c.addPrivateAssignOp()
+    c.instanceCode = 'sipCpp = new wxGridActivationResult::DoNothing();'
+
+
+    c = module.find('wxGridActivationSource')
+    c.ignore() # FIXME
+    c.noDefCtor = True
+    c.addPrivateAssignOp()
 
 
     #-----------------------------------------------------------------
@@ -373,12 +391,18 @@ def run():
     c.find('~wxGridCellEditor').ignore(False)
     c.find('Clone').factory = True
     tools.fixRefCountedClass(c)
+    c.find('TryActivate').ignore() # FIXME: remove this when the compilation issues with wxGridActivationResult is fixed
+
+
+    c = module.find('wxGridCellActivatableEditor')
+    c.ignore() # FIXME: see above
+
 
     c = module.find('wxGridCellChoiceEditor')
     c.find('wxGridCellChoiceEditor').findOverload('count').ignore()
 
     for name in ITEMS:
-        if 'Cell' in name and 'Editor' in name:
+        if 'Cell' in name and 'Editor' in name and name != 'wxGridCellActivatableEditor':
             fixEditorClass(name)
 
     module.addPyCode("PyGridCellEditor = wx.deprecated(GridCellEditor, 'Use GridCellEditor instead.')")
@@ -605,6 +629,32 @@ def run():
     c.find('SetCellTextColour').overloads = []
 
     c.find('GetGridWindowOffset').findOverload('int &x').ignore()
+
+
+    # Custom code to deal with the wxGridBlockCoordsVector return type of these
+    # methods. It's a wxVector, which we'll just convert to a list.
+
+    # TODO: There are a few of these now to we ought to either wrap wxVector, or add
+    #       something in tweaker_tools to make adding code like this easier and more
+    #       automated.
+    code = """\
+        wxPyThreadBlocker blocker;
+        PyObject* result = PyList_New(0);
+        wxGridBlockCoordsVector vector = self->{method}();
+        for (size_t idx=0; idx < vector.size(); idx++) {{
+            PyObject* obj;
+            wxGridBlockCoords* item = new wxGridBlockCoords(vector[idx]);
+            obj = wxPyConstructObject((void*)item, "wxGridBlockCoords", true);
+            PyList_Append(result, obj);
+            Py_DECREF(obj);
+        }}
+        return result;
+        """
+    c.find('GetSelectedRowBlocks').type = 'PyObject*'
+    c.find('GetSelectedRowBlocks').setCppCode(code.format(method='GetSelectedRowBlocks'))
+    c.find('GetSelectedColBlocks').type = 'PyObject*'
+    c.find('GetSelectedColBlocks').setCppCode(code.format(method='GetSelectedColBlocks'))
+
 
     #-----------------------------------------------------------------
     c = module.find('wxGridUpdateLocker')
