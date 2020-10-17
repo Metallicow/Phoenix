@@ -13,7 +13,7 @@
 #----------------------------------------------------------------------------
 """
 Dock art provider code - a dock provider provides all drawing functionality to
-the AUI dock manager. This allows the dock manager to have a pluggable look-and-feel.
+the AUI dock manager. This allows the dock manager to have a plugable look-and-feel.
 
 By default, a :class:`~wx.lib.agw.aui.framemanager` uses an instance of this class called :mod:`~wx.lib.agw.aui.dockart`
 which provides bitmap art and a colour scheme that is adapted to the major platforms'
@@ -52,7 +52,7 @@ if wx.Platform == "__WXMSW__":
 class AuiDefaultDockArt(object):
     """
     Dock art provider code - a dock provider provides all drawing functionality to the AUI dock manager.
-    This allows the dock manager to have a pluggable look-and-feel.
+    This allows the dock manager to have a plugable look-and-feel.
 
     By default, a :class:`~wx.lib.agw.aui.framemanager.AuiManager` uses an instance of this class called
     :class:`AuiDefaultDockArt` which provides bitmap art and a colour scheme that is adapted to the major
@@ -90,6 +90,7 @@ class AuiDefaultDockArt(object):
     ``AUI_DOCKART_GRADIENT_TYPE``                     Customizes the gradient type (no gradient, vertical or horizontal)
     ``AUI_DOCKART_DRAW_SASH_GRIP``                    Draw a sash grip on the sash
     ``AUI_DOCKART_HINT_WINDOW_COLOUR``                Customizes the hint window background colour (currently light blue)
+    ``AUI_DOCKART_HINT_WINDOW_BORDER_COLOUR``         Customizes the hint window border background colour (currently grey)
     ================================================  ======================================
 
 
@@ -241,6 +242,7 @@ class AuiDefaultDockArt(object):
         self._gripper_pen3 = wx.WHITE_PEN
 
         self._hint_background_colour = colourHintBackground
+        self._hint_border_colour = colourHintBorder
 
 
     def GetMetric(self, id):
@@ -326,6 +328,8 @@ class AuiDefaultDockArt(object):
             return self._gripper_brush.GetColour()
         elif id == AUI_DOCKART_HINT_WINDOW_COLOUR:
             return self._hint_background_colour
+        elif id == AUI_DOCKART_HINT_WINDOW_BORDER_COLOUR:
+            return self._hint_border_colour
         else:
             raise Exception("Invalid Colour Ordinal.")
 
@@ -377,6 +381,8 @@ class AuiDefaultDockArt(object):
             self._gripper_pen2.SetColour(StepColour(colour, 60))
         elif id == AUI_DOCKART_HINT_WINDOW_COLOUR:
             self._hint_background_colour = colour
+        elif id == AUI_DOCKART_HINT_WINDOW_BORDER_COLOUR:
+            self._hint_border_colour = colour
         else:
             raise Exception("Invalid Colour Ordinal.")
 

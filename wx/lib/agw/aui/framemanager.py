@@ -2728,6 +2728,8 @@ class AuiDockingHintWindow(wx.Frame):
         self._art = parent.GetEventHandler().GetArtProvider()
         background = self._art.GetColour(AUI_DOCKART_HINT_WINDOW_COLOUR)
         self.SetBackgroundColour(background)
+        border = self._art.GetColour(AUI_DOCKART_HINT_WINDOW_BORDER_COLOUR)
+        self._border_pen = wx.Pen(border, 5)
 
         # Can't set background colour on a frame on wxMac
         # so add a panel to set the colour on.
@@ -2750,17 +2752,22 @@ class AuiDockingHintWindow(wx.Frame):
         """
 
         amount = 128
-        size = self.GetClientSize()
-        region = wx.Region(0, 0, size.x, 1)
+        size_x, size_y = self.GetClientSize()
+        region = wx.Region(0, 0, size_x, 1)
 
-        for y in range(size.y):
-
-            # Reverse the order of the bottom 4 bits
-            j = (y & 8 and [1] or [0])[0] | (y & 4 and [2] or [0])[0] | \
-                (y & 2 and [4] or [0])[0] | (y & 1 and [8] or [0])[0]
-
-            if 16*j+8 < amount:
-                region.Union(0, y, size.x, 1)
+        ## for y in range(size_y):
+        ##
+        ##     # Reverse the order of the bottom 4 bits
+        ##     j = (y & 8 and [1] or [0])[0] | (y & 4 and [2] or [0])[0] | \
+        ##         (y & 2 and [4] or [0])[0] | (y & 1 and [8] or [0])[0]
+        ##
+        ##     if 16*j+8 < amount:
+        ##         region.Union(0, y, size_x, 1)
+        region_Union = region.Union  # local opt
+        [region_Union(0, y, size_x, 1) for y in range(size_y)
+            if 16 * ((y & 8 and [1] or [0])[0] | (y & 4 and [2] or [0])[0] |
+                     (y & 2 and [4] or [0])[0] | (y & 1 and [8] or [0])[0])
+                     + 8 < amount]
 
         self.SetShape(region)
 
@@ -2814,6 +2821,8 @@ class AuiDockingHintWindow(wx.Frame):
         """
 
         background = self._art.GetColour(AUI_DOCKART_HINT_WINDOW_COLOUR)
+        border = self._art.GetColour(AUI_DOCKART_HINT_WINDOW_BORDER_COLOUR)
+        self._border_pen = wx.Pen(border, 5)
 
         if wx.Platform == '__WXMAC__':
             self.panel.SetBackgroundColour(background)
@@ -2848,13 +2857,13 @@ class AuiDockingHintWindow(wx.Frame):
         :param `event`: an instance of :class:`PaintEvent` to be processed.
         """
 
-        rect = wx.Rect(wx.Point(0, 0), self.GetSize())
+        rect = wx.Rect((0, 0), self.GetSize())
 
         dc = wx.PaintDC(self)
         event.Skip()
 
         dc.SetBrush(wx.TRANSPARENT_BRUSH)
-        dc.SetPen(wx.Pen(wx.Colour(60, 60, 60), 5))
+        dc.SetPen(self._border_pen)
         rect.Deflate(1, 1)
         dc.DrawRectangle(rect)
 
@@ -4674,7 +4683,7 @@ class AuiManager(wx.EvtHandler):
     def SetArtProvider(self, art_provider):
         """
         Instructs :class:`AuiManager` to use art provider specified by the parameter
-        `art_provider` for all drawing calls. This allows pluggable look-and-feel
+        `art_provider` for all drawing calls. This allows plugable look-and-feel
         features.
 
         :param `art_provider`: a AUI dock art provider.
@@ -4697,7 +4706,7 @@ class AuiManager(wx.EvtHandler):
     def AddPane(self, window, arg1=None, arg2=None, target=None):
         """
         Tells the frame manager to start managing a child window. There
-        are four versions of this function. The first version allows the full spectrum
+        are four versions of this function. The first verison allows the full spectrum
         of pane parameter possibilities (:meth:`AddPane1`). The second version is used for
         simpler user interfaces which do not require as much configuration (:meth:`AddPane2`).
         The :meth:`AddPane3` version allows a drop position to be specified, which will determine
@@ -4809,7 +4818,7 @@ class AuiManager(wx.EvtHandler):
                 # so use GetBestSize()
                 pinfo.best_size = pinfo.window.GetBestSize()
 
-                # this is needed for Win2000 to correctly fill toolbar background
+                # this is needed for Win2000 to correctly fill toolbar backround
                 # it should probably be repeated once system colour change happens
                 if wx.Platform == "__WXMSW__" and pinfo.window.UseBgCol():
                     pinfo.window.SetBackgroundColour(self.GetArtProvider().GetColour(AUI_DOCKART_BACKGROUND_COLOUR))
@@ -6343,7 +6352,7 @@ class AuiManager(wx.EvtHandler):
     def SetDockSizeConstraint(self, width_pct, height_pct):
         """
         When a user creates a new dock by dragging a window into a docked position,
-        often times the large size of the window will create a dock that is unwieldy
+        often times the large size of the window will create a dock that is unwieldly
         large.
 
         :class:`AuiManager` by default limits the size of any new dock to 1/3 of the window
@@ -10309,7 +10318,7 @@ class AuiManager(wx.EvtHandler):
                 self.GetPane(notebook).CaptionVisible(False).PaneBorder(False)
                 self.Update()
 
-        # it seems the notebook isn't created by this stage, so remove
+        # it seems the notebook isnt created by this stage, so remove
         # the caption a moment later
         wx.CallAfter(RemoveCaption)
         return True
@@ -10744,7 +10753,7 @@ class AuiManager_DCP(AuiManager):
                              not pane.IsFloating() and pane.IsShown() for pane in self.GetAllPanes())
         if haveCenterPane:
             if self.hasDummyPane:
-                # there's our dummy pane and also another center pane, therefore let's remove our dummy
+                # there's our dummy pane and also another center pane, therefor let's remove our dummy
                 def do():
                     self._destroyDummyPane()
                     self.Update()

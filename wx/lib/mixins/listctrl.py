@@ -47,7 +47,7 @@ class ColumnSorterMixin:
     A mixin class that handles sorting of a wx.ListCtrl in REPORT mode when
     the column header is clicked on.
 
-    There are a few requirements needed in order for this to work genericly:
+    There are a few requirments needed in order for this to work genericly:
 
       1. The combined class must have a GetListCtrl method that
          returns the wx.ListCtrl to be sorted, and the list control
@@ -106,7 +106,7 @@ class ColumnSorterMixin:
         Returns a tuple of image list indexesthe indexes in the image list for an image to be put on the column
         header when sorting in descending order.
         """
-        return (-1, -1)  # (descending, ascending) image IDs
+        return (-1, -1)  # (decending, ascending) image IDs
 
 
     def GetColumnSorter(self):
@@ -584,7 +584,7 @@ class TextEditMixin:
                 # don't start scrolling unless we really need to
                 offset = x0+x1-self.GetSize()[0]-scrolloffset
                 # scroll a bit more than what is minimum required
-                # so we don't have to scroll every time the user presses TAB
+                # so we don't have to scroll everytime the user presses TAB
                 # which is very tireing to the eye
                 addoffset = self.GetSize()[0]/4
                 # but be careful at the end of the list
@@ -642,7 +642,7 @@ class TextEditMixin:
         ret = self.GetEventHandler().ProcessEvent(evt)
         if not ret or evt.IsAllowed():
             if self.IsVirtual():
-                # replace by whether you use to populate the virtual ListCtrl
+                # replace by whather you use to populate the virtual ListCtrl
                 # data source
                 self.SetVirtualData(self.curRow, self.curCol, text)
             else:
@@ -692,6 +692,11 @@ HISTORY:
 1.1     - Initial version
 """
 
+_warning = (
+"The CheckListCtrlMixin class has been made redundant by new checkbox features in the "
+"wx.ListCtrl class. It is advised to switch your code to use that instead of this mixin.")
+
+
 class CheckListCtrlMixin(object):
     """
     This is a mixin for ListCtrl which add a checkbox in the first
@@ -709,8 +714,14 @@ class CheckListCtrlMixin(object):
           CheckItem().
 
     You should not set a imagelist for the ListCtrl once this mixin is used.
+
+    WARNING: This class is obsolete as wx.ListCtrl now includes nearly the same
+    functionality.
     """
     def __init__(self, check_image=None, uncheck_image=None, imgsz=(16,16)):
+        import warnings
+        warnings.warn(_warning)
+
         if check_image is not None:
             imgsz = check_image.GetSize()
         elif uncheck_image is not None:

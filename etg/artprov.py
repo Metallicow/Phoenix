@@ -52,19 +52,6 @@ def run():
     # deprecated and removed
     c.find('Insert').ignore()
 
-    # Change the types of the art constants from wxString to const char*
-    # since that is what they really are.
-    artConsts = list()
-    for item in module:
-        if isinstance(item, etgtools.GlobalVarDef):
-            if item.type in ['wxArtClient', 'wxArtID']:
-                item.type = 'const char*'
-                artConsts.append(item)
-    # move them to the front of the module
-    for item in artConsts:
-        module.items.remove(item)
-        module.items.insert(0, item)
-
 
     #-----------------------------------------------------------------
     tools.doCommonTweaks(module)

@@ -219,13 +219,13 @@ class FMCustomizeDlg(wx.Dialog):
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
 
         # add a separator between the book & the buttons area
-        hsizer.Add(wx.Button(self, wx.ID_OK, _("&Close")), 0, wx.EXPAND | wx.ALIGN_RIGHT)
+        hsizer.Add(wx.Button(self, wx.ID_OK, _("&Close")), 0, wx.EXPAND)
         sz.Add(wx.StaticLine(self), 0, wx.EXPAND | wx.TOP | wx.BOTTOM, 3)
         sz.Add(hsizer, 0, wx.ALIGN_RIGHT | wx.ALL, 2)
 
 
     def Initialise(self):
-        """ Initializes the :class:`~wx.lib.agw.labelbook.LabelBook` pages. """
+        """ Initialzes the :class:`~wx.lib.agw.labelbook.LabelBook` pages. """
 
         self._book.DeleteAllPages()
         self._book.AddPage(self.CreateMenusPage(), _("Menus"), True)
@@ -307,10 +307,10 @@ class FMCustomizeDlg(wx.Dialog):
 
 
     def CreateShortcutsPage(self):
-        """ Creates the :class:`~wx.lib.agw.labelbook.LabelBook` shortcuts page. """
+        """ Creates the :class:`~wx.lib.agw.labelbook.LabelBook` shorcuts page. """
 
-        shortcuts = wx.Panel(self._book, wx.ID_ANY, wx.DefaultPosition, wx.Size(300, 300))
-        return shortcuts
+        shorcuts = wx.Panel(self._book, wx.ID_ANY, wx.DefaultPosition, wx.Size(300, 300))
+        return shorcuts
 
 
     def CreateOptionsPage(self):
